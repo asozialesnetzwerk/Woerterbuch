@@ -143,10 +143,11 @@ namespace Woerterbuch
 
         public static void Main (string[] args)
         {
+            MainClass mc = new MainClass();
+            mc.CreateWordList(args);
             try
             {
-                MainClass mc = new MainClass();
-                mc.CreateWordList(args);
+                
             }
             catch (Exception exc)
             {
