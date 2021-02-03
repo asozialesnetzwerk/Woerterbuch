@@ -1,0 +1,5 @@
+/home/torsten/Source/Woerterbuch/Woerterbuch/obj/x86/Release/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/home/torsten/Source/Woerterbuch/Woerterbuch/bin/Release/Woerterbuch.exe.mdb
+/home/torsten/Source/Woerterbuch/Woerterbuch/bin/Release/Woerterbuch.exe
+/home/torsten/Source/Woerterbuch/Woerterbuch/obj/x86/Release/Woerterbuch.exe
+/home/torsten/Source/Woerterbuch/Woerterbuch/obj/x86/Release/Woerterbuch.exe.mdb

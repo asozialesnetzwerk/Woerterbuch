@@ -1,0 +1,6 @@
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/obj/x86/Release/.NETFramework,Version=v4.5.AssemblyAttribute.cs
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/obj/x86/Release/WoerterbuchGUI.gtk-gui.gui.stetic
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/bin/Release/WoerterbuchGUI.exe.mdb
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/bin/Release/WoerterbuchGUI.exe
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/obj/x86/Release/WoerterbuchGUI.exe
+/home/torsten/Source/Woerterbuch/WoerterbuchGUI/obj/x86/Release/WoerterbuchGUI.exe.mdb

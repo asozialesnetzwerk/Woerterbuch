@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Woerterbuch", "Woerterbuch\Woerterbuch.csproj", "{871F4795-5B91-4630-86B3-F77FF8249499}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoerterbuchGUI", "WoerterbuchGUI\WoerterbuchGUI.csproj", "{BCCB4B6B-E705-4EDB-8275-1FD7CD6E9224}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{871F4795-5B91-4630-86B3-F77FF8249499}.Debug|x86.ActiveCfg = Debug|x86
+		{871F4795-5B91-4630-86B3-F77FF8249499}.Debug|x86.Build.0 = Debug|x86
+		{871F4795-5B91-4630-86B3-F77FF8249499}.Release|x86.ActiveCfg = Release|x86
+		{871F4795-5B91-4630-86B3-F77FF8249499}.Release|x86.Build.0 = Release|x86
+		{BCCB4B6B-E705-4EDB-8275-1FD7CD6E9224}.Debug|x86.ActiveCfg = Debug|x86
+		{BCCB4B6B-E705-4EDB-8275-1FD7CD6E9224}.Debug|x86.Build.0 = Debug|x86
+		{BCCB4B6B-E705-4EDB-8275-1FD7CD6E9224}.Release|x86.ActiveCfg = Release|x86
+		{BCCB4B6B-E705-4EDB-8275-1FD7CD6E9224}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Woerterbuch\Woerterbuch.csproj
+	EndGlobalSection
+EndGlobal
