@@ -8,17 +8,17 @@ namespace Woerterbuch
 {
     public class MainClass
     {
-        private DateTime m_startTime;
+        private DateTime _mStartTime;
 
-        public List <string> ParseWords(string[] zimFiles)
+        public List <WordInfo> ParseWords(string[] zimFiles)
         {
             WordParser wp = new WordParser(4);
             wp.ProgressEvent += ProgressEventHandler;
 
             foreach (string zimFile in zimFiles)
             {
-                m_promille = -1;
-                m_startTime = DateTime.Now;
+                _mPromille = -1;
+                _mStartTime = DateTime.Now;
                 wp.Parse(zimFile);
             }
 
@@ -29,7 +29,7 @@ namespace Woerterbuch
 
         public void CreateWordList(string[] zimFiles)
         {
-            List <string> wordList = ParseWords(zimFiles);
+            List <WordInfo> wordList = ParseWords(zimFiles);
             Console.WriteLine("num words: " + wordList.Count);
 
             Console.WriteLine("sort word list ...");
@@ -42,20 +42,21 @@ namespace Woerterbuch
             Console.WriteLine("done");
         }
 
-        private void CreateSpellCheckedWordList(List <string> wordList)
+        private void CreateSpellCheckedWordList(List <WordInfo> wordList)
         {
-            List <string> wordListSpellChecked = new List<string>();
+            List <WordInfo> wordListSpellChecked = new List<WordInfo>();
 
             Console.WriteLine("create spell checked word list ...");
 
             using (Hunspell hunspell = new Hunspell("/usr/share/hunspell/de_DE.aff", "/usr/share/hunspell/de_DE.dic"))
             {
-                foreach (string word in wordList)
+                foreach (WordInfo wordInfo in wordList)
                 {
+                    string word = wordInfo.GetWord();
                     if (word.Length < 64)
                     {
                         if (hunspell.SpellCheck(word))
-                            wordListSpellChecked.Add(word);
+                            wordListSpellChecked.Add(wordInfo);
                     }
                 }
             }
@@ -65,28 +66,37 @@ namespace Woerterbuch
             SaveWordList(wordListSpellChecked, "word_list_spell_checked.txt");
         }
 
-        private void CreateUppercaseSpellCheckedWordList(List <string> wordList)
+        private void CreateUppercaseSpellCheckedWordList(List <WordInfo> wordList)
         {
-            Dictionary <string, int> dictionary = new Dictionary<string, int>();
+            Dictionary <string, WordInfo> dictionary = new Dictionary<string, WordInfo>();
             CultureInfo ci = new CultureInfo("de-DE", false);
 
             Console.WriteLine("create uppercase spell checked word list ...");
 
-            foreach (string word in wordList)
+            foreach (WordInfo wordInfo in wordList)
             {
-                dictionary[word.ToUpper(ci)] = 1;
+                WordInfo wordInfoUpper = wordInfo.CopyUpper();
+                string word = wordInfoUpper.GetWord();
+                if (dictionary.ContainsKey(word))
+                {
+                    dictionary[word].Merge(wordInfoUpper);
+                }
+                else
+                {
+                    dictionary[word] = wordInfoUpper;
+                }
             }
 
-            List <string> wordListUppercaseSpellChecked = new List<string>();
+            List <WordInfo> wordListUppercaseSpellChecked = new List<WordInfo>();
 
             using (Hunspell hunspell = new Hunspell("/usr/share/hunspell/de_DE.aff", "/usr/share/hunspell/de_DE.dic"))
             {
-                foreach (string word in dictionary.Keys)
+                foreach (WordInfo wordInfo in dictionary.Values)
                 {
-                    if (word.Length < 64)
+                    if (wordInfo.GetWord().Length < 64)
                     {
-                        if (hunspell.SpellCheck(word))
-                            wordListUppercaseSpellChecked.Add(word);
+                        if (hunspell.SpellCheck(wordInfo.GetWord()))
+                            wordListUppercaseSpellChecked.Add(wordInfo);
                     }
                 }
             }
@@ -96,29 +106,29 @@ namespace Woerterbuch
             SaveWordList(wordListUppercaseSpellChecked, "word_list_uppercase_spell_checked.txt");
         }
 
-        private void SaveWordList(List <string> list, string fileName)
+        private void SaveWordList(List <WordInfo> list, string fileName)
         {
             using (StreamWriter w = new StreamWriter(fileName))
             {
-                foreach (string word in list)
+                foreach (WordInfo wordInfo in list)
                 {
-                    w.WriteLine(word);
+                    w.WriteLine(wordInfo.ToString());
                 }
             }
         }
 
-        private double m_promille;
+        private double _mPromille;
 
         public void ProgressEventHandler(int index, int count)
         {
             double promille = Math.Ceiling(1000.0f * (double)index / (double)count);
-            if (promille != m_promille)
+            if (promille != _mPromille)
             {
-                m_promille = promille;
+                _mPromille = promille;
 
                 if (promille != 0)
                 {
-                    double s = (DateTime.Now - m_startTime).TotalSeconds;
+                    double s = (DateTime.Now - _mStartTime).TotalSeconds;
                     double remaining = s / promille * (1000 - promille);
                     TimeSpan t = TimeSpan.FromSeconds(remaining);
 

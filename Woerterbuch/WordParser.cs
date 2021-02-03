@@ -11,20 +11,20 @@ namespace Woerterbuch
 
         public event ProgressEventHandler ProgressEvent;
 
-        private int m_numThreads;
-        private ZIM m_zim;
-        private int m_numArticlesParsed;
-        private object m_lock = new object();
-        Dictionary <string, int> m_dictionary = new Dictionary<string, int>();
+        private int _mNumThreads;
+        private Zim _mZim;
+        private int _mNumArticlesParsed;
+        private object _mLock = new object();
+        Dictionary <string, WordInfo> _wordDictionary = new Dictionary<string, WordInfo>();
 
-        public List <string> WordList
+        public List <WordInfo> WordList
         {
             get
             {
-                List <string> wordList = new List<string>();
+                List <WordInfo> wordList = new List<WordInfo>();
 
-                foreach (string key in m_dictionary.Keys)
-                    wordList.Add(key);
+                foreach (WordInfo val in _wordDictionary.Values)
+                    wordList.Add(val);
 
                 return wordList;
             }
@@ -32,27 +32,27 @@ namespace Woerterbuch
 
         public WordParser(int numThreads)
         {
-            m_numThreads = numThreads;
+            _mNumThreads = numThreads;
         }
 
         public void Clear()
         {
-            m_dictionary.Clear();
+            _wordDictionary.Clear();
         }
 
         public void Parse(string zimFileName)
         {
-            m_numArticlesParsed = 0;
+            _mNumArticlesParsed = 0;
 
             List <WordParserThread> threadList = new List<WordParserThread>();
             int idx;
 
-            using (m_zim = new ZIM(zimFileName))
+            using (_mZim = new Zim(zimFileName))
             {
-                m_zim.Init();
+                _mZim.Init();
                 SendProgressEvent();
 
-                for (idx = 0; idx < m_numThreads; idx++)
+                for (idx = 0; idx < _mNumThreads; idx++)
                 {
                     WordParserThread wpt = new WordParserThread(this);
                     wpt.ArticleParsedEvent += ArticleParsedEventHandler;
@@ -69,10 +69,16 @@ namespace Woerterbuch
             
             foreach (WordParserThread wpt in threadList)
             {
-                foreach (var item in wpt.Dictionary)
+                foreach (var keyValPair in wpt.WordDict)
                 {
-                    if (!m_dictionary.ContainsKey(item.Key))
-                        m_dictionary[item.Key] = 1;
+                    if (_wordDictionary.ContainsKey(keyValPair.Key))
+                    {
+                        _wordDictionary[keyValPair.Key].Merge(keyValPair.Value);
+                    }
+                    else
+                    {
+                        _wordDictionary[keyValPair.Key] = keyValPair.Value;
+                    }
                 }
             }
         }
@@ -80,30 +86,30 @@ namespace Woerterbuch
         private void SendProgressEvent()
         {
             if (ProgressEvent != null)
-                ProgressEvent(m_numArticlesParsed, m_zim.Count);
+                ProgressEvent(_mNumArticlesParsed, _mZim.Count);
         }
 
         private void ArticleParsedEventHandler()
         {
-            lock (m_lock)
+            lock (_mLock)
             {
-                m_numArticlesParsed++;
+                _mNumArticlesParsed++;
                 SendProgressEvent();
             }
         }
 
         public string GetNextArticle()
         {
-            lock (m_zim)
+            lock (_mZim)
             {
-                while (!m_zim.IsEnd() && (m_zim.GetArticleSize() == 0))
-                    m_zim.Next();
+                while (!_mZim.IsEnd() && (_mZim.GetArticleSize() == 0))
+                    _mZim.Next();
 
-                if (m_zim.IsEnd())
+                if (_mZim.IsEnd())
                     return null;
 
-                string article = m_zim.GetArticle();
-                m_zim.Next();
+                string article = _mZim.GetArticle();
+                _mZim.Next();
 
                 return article;
             }

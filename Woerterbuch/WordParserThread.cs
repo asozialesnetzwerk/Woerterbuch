@@ -7,40 +7,36 @@ namespace Woerterbuch
 {
     public class WordParserThread
     {
-        private IArticle m_iArticle;
-        private Thread m_thread;
-        private Dictionary <string, int> m_dictionary = new Dictionary<string, int>();
-
+        private readonly IArticle _mIArticle;
+        private Thread _mThread;
+        private readonly Dictionary <string, WordInfo> _wordDictionary = new Dictionary<string, WordInfo>();
         public delegate void ArticleParsedEventHandler();
 
         public event ArticleParsedEventHandler ArticleParsedEvent;
 
-        public Dictionary <string, int> Dictionary
-        {
-            get { return m_dictionary; }
-        }
+        public Dictionary <string, WordInfo> WordDict => _wordDictionary;
 
         public WordParserThread(IArticle iArticle)
         {
-            m_iArticle = iArticle;
+            _mIArticle = iArticle;
         }
 
         public void Start()
         {
-            m_thread = new Thread(Run);
-            m_thread.Start();
+            _mThread = new Thread(Run);
+            _mThread.Start();
         }
 
         public void Join()
         {
-            m_thread.Join();
+            _mThread.Join();
         }
 
         private void Run()
         {
             try
             {
-                string article = m_iArticle.GetNextArticle();
+                string article = _mIArticle.GetNextArticle();
 
                 while (article != null)
                 {
@@ -52,7 +48,7 @@ namespace Woerterbuch
                     if (ArticleParsedEvent != null)
                         ArticleParsedEvent();
 
-                    article = m_iArticle.GetNextArticle();
+                    article = _mIArticle.GetNextArticle();
                 }
             }
             catch (Exception exc)
@@ -80,13 +76,14 @@ namespace Woerterbuch
                 ParseHtmlNode(childNode);
         }
 
-        private enum EParseState { NONE, WORD, ESCAPE }
+        private enum EParseState { None, Word, Escape }
 
         private void ParseText(string txt)
         {
             int startPos = 0;
             int pos;
-            EParseState state = EParseState.NONE;
+            EParseState state = EParseState.None;
+            string lastWord = "";
 
             for (pos = 0; pos < txt.Length; pos++)
             {
@@ -94,53 +91,67 @@ namespace Woerterbuch
 
                 switch (state)
                 {
-                    case EParseState.NONE:
+                    case EParseState.None:
                         if (Utils.IsGermanLetter(c))
                         {
                             startPos = pos;
-                            state = EParseState.WORD;
+                            state = EParseState.Word;
                         }
 
                         if (c == '&')
-                            state = EParseState.ESCAPE;
+                            state = EParseState.Escape;
 
                         break;
 
-                    case EParseState.WORD:
+                    case EParseState.Word:
                         if (!Utils.IsGermanLetter(c))
                         {
                             string word = txt.Substring(startPos, pos - startPos);
-                            WordFound(word);
-
+                            WordFound(word, lastWord);
+                            
+                            lastWord = word;
+                            
                             if (c == '&')
-                                state = EParseState.ESCAPE;
+                                state = EParseState.Escape;
                             else
-                                state = EParseState.NONE;
+                                state = EParseState.None;
                         }
                         break;
 
-                    case EParseState.ESCAPE:
+                    case EParseState.Escape:
 
                         if (c == ';')
-                            state = EParseState.NONE;
+                            state = EParseState.None;
 
                         break;
                 }
             }
 
-            if (state == EParseState.WORD)
+            if (state == EParseState.Word)
             {
                 string word = txt.Substring(startPos, pos - startPos);
-                WordFound(word);
+                WordFound(word, lastWord);
             }
         }
 
-        private void WordFound(string word)
+        private void WordFound(string word, string lastWord)
         {
-            if ((word.Length > 1) && (word.Length <= 64))
+            if ((word.Length <= 1) || (word.Length > 64)) return;
+            if (_wordDictionary.ContainsKey(word))
             {
-                m_dictionary[word] = 1;
+                _wordDictionary[word].IncreaseCount();
             }
+            else
+            {
+                _wordDictionary[word] = new WordInfo(word);
+            }
+
+            if ((lastWord.Length <= 1) || (lastWord.Length > 64)) return;
+            if (!_wordDictionary.ContainsKey(lastWord))
+            {
+                _wordDictionary[lastWord] = new WordInfo(lastWord);
+            }
+            _wordDictionary[lastWord].AddNextWord(word);
         }
     }
 }

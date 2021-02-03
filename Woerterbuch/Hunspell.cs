@@ -6,33 +6,33 @@ namespace SpellCheck
 {
     public class Hunspell : IDisposable
     {
-        private IntPtr m_pHunspell = IntPtr.Zero;
+        private IntPtr _mPHunspell = IntPtr.Zero;
 
         public Hunspell(string affpath, string dpath)
         {
-            m_pHunspell = Hunspell_create(affpath, dpath);
-            if (m_pHunspell == IntPtr.Zero)
+            _mPHunspell = Hunspell_create(affpath, dpath);
+            if (_mPHunspell == IntPtr.Zero)
                 throw new Exception("Can not open libhunspell");
         }
 
         public void Dispose()
         {
-            if (m_pHunspell != IntPtr.Zero)
+            if (_mPHunspell != IntPtr.Zero)
             {
-                Hunspell_destroy(m_pHunspell);
-                m_pHunspell = IntPtr.Zero;
+                Hunspell_destroy(_mPHunspell);
+                _mPHunspell = IntPtr.Zero;
             }
         }
 
-        private Encoding m_encoding = Encoding.GetEncoding("ISO-8859-1");
-        private byte[] m_byteArr = new byte[256];
+        private Encoding _mEncoding = Encoding.GetEncoding("ISO-8859-1");
+        private byte[] _mByteArr = new byte[256];
 
         public bool SpellCheck(string word)
         {
-            m_encoding.GetBytes(word, 0, word.Length, m_byteArr, 0);
-            m_byteArr[word.Length] = 0;
+            _mEncoding.GetBytes(word, 0, word.Length, _mByteArr, 0);
+            _mByteArr[word.Length] = 0;
 
-            return Hunspell_spell(m_pHunspell, m_byteArr) != 0;
+            return Hunspell_spell(_mPHunspell, _mByteArr) != 0;
         }
 
         [DllImport("libhunspell.so")]

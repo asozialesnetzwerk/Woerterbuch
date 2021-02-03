@@ -1035,7 +1035,7 @@ namespace HtmlAgilityPack
 			if (_crc32 != null)
 			{
 				// REVIEW: should we add some checksum code in DecrementPosition too?
-				_crc32.AddToCRC32(_c);
+				_crc32.AddToCrc32(_c);
 			}
 
 			_index++;
