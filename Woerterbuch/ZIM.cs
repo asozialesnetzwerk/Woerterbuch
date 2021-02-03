@@ -211,6 +211,7 @@ namespace Woerterbuch
         // extern "C" int zim_get_data(int handle, void *buffer)
         [DllImport("libzim_csharp.so.1.0")]
         public static extern int zim_get_data(int handle, byte[] data);
+        
     }
 }
 
