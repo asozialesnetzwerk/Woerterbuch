@@ -25,6 +25,7 @@ public:
   {
     Close();
     m_zimFile.reset(new zim::File(fileName));
+    m_zimIterator = m_zimFile.get()->begin();
   }
 
   void Close()
@@ -96,7 +97,7 @@ public:
 
 private:
   std::shared_ptr<zim::File> m_zimFile = std::shared_ptr<zim::File>();
-  zim::File::const_iterator m_zimIterator = zim::File::const_iterator(m_zimFile.get(), m_zimFile.get()->getCountArticles(), zim::File::const_iterator::ArticleIterator);
+  zim::File::const_iterator m_zimIterator = m_zimFile.get()->begin();
 
   std::string m_title;
   zim::Blob m_data;
