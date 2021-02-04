@@ -1,25 +1,25 @@
 using System;
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 using HtmlAgilityPack;
 
 namespace Woerterbuch
 {
     public class WordParserThread
     {
-        private readonly IArticle _mIArticle;
-        private Thread _mThread;
-        private readonly Dictionary <string, WordInfo> _wordDictionary = new Dictionary<string, WordInfo>();
         public delegate void ArticleParsedEventHandler();
 
-        public event ArticleParsedEventHandler ArticleParsedEvent;
-
-        public Dictionary <string, WordInfo> WordDict => _wordDictionary;
+        private readonly IArticle _mIArticle;
+        private Thread _mThread;
 
         public WordParserThread(IArticle iArticle)
         {
             _mIArticle = iArticle;
         }
+
+        public Dictionary<string, WordInfo> WordDict { get; } = new Dictionary<string, WordInfo>();
+
+        public event ArticleParsedEventHandler ArticleParsedEvent;
 
         public void Start()
         {
@@ -36,14 +36,11 @@ namespace Woerterbuch
         {
             try
             {
-                string article = _mIArticle.GetNextArticle();
+                var article = _mIArticle.GetNextArticle();
 
                 while (article != null)
                 {
-                    if (article.Contains("<html>"))
-                    {
-                        ParseHtml(article);
-                    }
+                    if (article.Contains("<html>")) ParseHtml(article);
 
                     if (ArticleParsedEvent != null)
                         ArticleParsedEvent();
@@ -59,7 +56,7 @@ namespace Woerterbuch
 
         private void ParseHtml(string article)
         {
-            HtmlDocument html = new HtmlDocument();
+            var html = new HtmlDocument();
             html.LoadHtml(article);
 
             ParseHtmlNode(html.DocumentNode);
@@ -67,27 +64,22 @@ namespace Woerterbuch
 
         private void ParseHtmlNode(HtmlNode node)
         {
-            if (!String.IsNullOrWhiteSpace(node.InnerText))
-            {
-                ParseText(node.InnerText);
-            }
+            if (!string.IsNullOrWhiteSpace(node.InnerText)) ParseText(node.InnerText);
 
             foreach (var childNode in node.ChildNodes)
                 ParseHtmlNode(childNode);
         }
 
-        private enum EParseState { None, Word, Escape }
-
         private void ParseText(string txt)
         {
-            int startPos = 0;
+            var startPos = 0;
             int pos;
-            EParseState state = EParseState.None;
-            string lastWord = "";
+            var state = EParseState.None;
+            var lastWord = "";
 
             for (pos = 0; pos < txt.Length; pos++)
             {
-                char c = txt[pos];
+                var c = txt[pos];
 
                 switch (state)
                 {
@@ -106,16 +98,17 @@ namespace Woerterbuch
                     case EParseState.Word:
                         if (!Utils.IsGermanLetter(c))
                         {
-                            string word = txt.Substring(startPos, pos - startPos);
+                            var word = txt.Substring(startPos, pos - startPos);
                             WordFound(word, lastWord);
-                            
+
                             lastWord = word;
-                            
+
                             if (c == '&')
                                 state = EParseState.Escape;
                             else
                                 state = EParseState.None;
                         }
+
                         break;
 
                     case EParseState.Escape:
@@ -129,30 +122,29 @@ namespace Woerterbuch
 
             if (state == EParseState.Word)
             {
-                string word = txt.Substring(startPos, pos - startPos);
+                var word = txt.Substring(startPos, pos - startPos);
                 WordFound(word, lastWord);
             }
         }
 
         private void WordFound(string word, string lastWord)
         {
-            if ((word.Length <= 1) || (word.Length > 64)) return;
-            if (_wordDictionary.ContainsKey(word))
-            {
-                _wordDictionary[word].IncreaseCount();
-            }
+            if (word.Length <= 1 || word.Length > 64) return;
+            if (WordDict.ContainsKey(word))
+                WordDict[word].IncreaseCount();
             else
-            {
-                _wordDictionary[word] = new WordInfo(word);
-            }
+                WordDict[word] = new WordInfo(word);
 
-            if ((lastWord.Length <= 1) || (lastWord.Length > 64)) return;
-            if (!_wordDictionary.ContainsKey(lastWord))
-            {
-                _wordDictionary[lastWord] = new WordInfo(lastWord);
-            }
-            _wordDictionary[lastWord].AddNextWord(word);
+            if (lastWord.Length <= 1 || lastWord.Length > 64) return;
+            if (!WordDict.ContainsKey(lastWord)) WordDict[lastWord] = new WordInfo(lastWord);
+            WordDict[lastWord].AddNextWord(word);
+        }
+
+        private enum EParseState
+        {
+            None,
+            Word,
+            Escape
         }
     }
 }
-

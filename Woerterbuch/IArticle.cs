@@ -1,5 +1,3 @@
-using System;
-
 namespace Woerterbuch
 {
     public interface IArticle
@@ -7,4 +5,3 @@ namespace Woerterbuch
         string GetNextArticle();
     }
 }
-

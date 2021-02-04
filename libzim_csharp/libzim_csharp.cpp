@@ -1,11 +1,9 @@
-
 #include <string.h>
-
-#include <stdexcept>
-#include <memory>
 
 #include <zim/file.h>
 #include <zim/fileiterator.h>
+
+#include <vector>
 
 //-----------------------------------------------------------------------------
 
@@ -17,10 +15,12 @@ using namespace std;
 
 //-----------------------------------------------------------------------------
 
-class ZimFileHandle
-{
+class ZimFileHandle {
 public:
-
+  ZimFileHandle() {
+     std::cout << "Hello World!";
+  }
+  
   void Open(const std::string & fileName)
   {
     Close();
@@ -95,8 +95,8 @@ public:
   }
 
 private:
-  shared_ptr<zim::File> m_zimFile;
-  zim::File::const_iterator m_zimIterator;
+  std::shared_ptr<zim::File> m_zimFile = std::shared_ptr<zim::File>();
+  zim::File::const_iterator m_zimIterator = zim::File::const_iterator(m_zimFile.get(), m_zimFile.get()->getCountArticles(), zim::File::const_iterator::ArticleIterator);
 
   std::string m_title;
   zim::Blob m_data;

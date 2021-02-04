@@ -1,18 +1,16 @@
-using System;
-
 namespace Woerterbuch
 {
     public class Utils
     {
         public static bool IsGermanLetter(char c)
         {
-            if ((c >= 'A') && (c <= 'Z'))
+            if (c >= 'A' && c <= 'Z')
                 return true;
 
-            if ((c >= 'a') && (c <= 'z'))
+            if (c >= 'a' && c <= 'z')
                 return true;
 
-            switch (c) 
+            switch (c)
             {
                 case 'ä':
                 case 'ö':
@@ -29,14 +27,13 @@ namespace Woerterbuch
 
         public static bool IsEnglishLetter(char c)
         {
-            if ((c >= 'A') && (c <= 'Z'))
+            if (c >= 'A' && c <= 'Z')
                 return true;
 
-            if ((c >= 'a') && (c <= 'z'))
+            if (c >= 'a' && c <= 'z')
                 return true;
 
             return false;
         }
     }
 }
-

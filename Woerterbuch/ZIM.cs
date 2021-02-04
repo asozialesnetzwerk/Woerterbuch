@@ -6,15 +6,11 @@ namespace Woerterbuch
 {
     public class Zim : IDisposable
     {
-        private byte[] _mTitleData = new byte[1024];
+        private readonly object _mLock = new object();
         private byte[] _mArticleData = new byte[1024];
 
         private int _mHandle = -1;
-        private int _mArticleCount = 0;
-
-        private readonly object _mLock = new object();
-
-        public int Count { get { return _mArticleCount; } }
+        private byte[] _mTitleData = new byte[1024];
 
         public Zim()
         {
@@ -23,6 +19,13 @@ namespace Woerterbuch
         public Zim(string fileName)
         {
             Open(fileName);
+        }
+
+        public int Count { get; private set; }
+
+        public void Dispose()
+        {
+            Close();
         }
 
         public void Open(string fileName)
@@ -34,7 +37,7 @@ namespace Woerterbuch
                 if (zim_open(fileName, out _mHandle) == -1)
                     throw new Exception("ZIM: can not open file: " + fileName);
 
-                _mArticleCount = CountItems();
+                Count = CountItems();
             }
         }
 
@@ -48,11 +51,6 @@ namespace Woerterbuch
                     _mHandle = -1;
                 }
             }
-        }
-
-        public void Dispose()
-        {
-            Close();
         }
 
         public void Init()
@@ -126,7 +124,7 @@ namespace Woerterbuch
             {
                 AssertValidHandle();
 
-                uint size = GetTitleSize();
+                var size = GetTitleSize();
 
                 if (size > _mTitleData.Length)
                     _mTitleData = new byte[size * 2];
@@ -134,7 +132,7 @@ namespace Woerterbuch
                 if (zim_get_title(_mHandle, _mTitleData) == -1)
                     throw new Exception("ZIM: title");
 
-                return Encoding.UTF8.GetString(_mTitleData, 0, (int)size);
+                return Encoding.UTF8.GetString(_mTitleData, 0, (int) size);
             }
         }
 
@@ -144,7 +142,7 @@ namespace Woerterbuch
             {
                 AssertValidHandle();
 
-                uint size = GetArticleSize();
+                var size = GetArticleSize();
 
                 if (size > _mArticleData.Length)
                     _mArticleData = new byte[size * 2];
@@ -152,13 +150,13 @@ namespace Woerterbuch
                 if (zim_get_data(_mHandle, _mArticleData) == -1)
                     throw new Exception("ZIM: data");
 
-                return Encoding.UTF8.GetString(_mArticleData, 0, (int)size);
+                return Encoding.UTF8.GetString(_mArticleData, 0, (int) size);
             }
         }
 
         private int CountItems()
         {
-            int numItems = 0;
+            var numItems = 0;
 
             Init();
             while (!IsEnd())
@@ -211,7 +209,5 @@ namespace Woerterbuch
         // extern "C" int zim_get_data(int handle, void *buffer)
         [DllImport("libzim_csharp.so.1.0")]
         public static extern int zim_get_data(int handle, byte[] data);
-        
     }
 }
-

@@ -5,18 +5,25 @@ namespace Woerterbuch
 {
     public class WordInfo
     {
-        private string _word;
-        private Dictionary<string, int> _nextWords = new Dictionary<string, int>();
         private int _count = 1;
+        private readonly string _word;
 
         public WordInfo(string word)
         {
             _word = word;
         }
 
-        public string GetWord() => _word;
-        public int GetCount() => _count;
-        public Dictionary<string, int> GetNextWords => _nextWords;
+        public Dictionary<string, int> GetNextWords { get; } = new Dictionary<string, int>();
+
+        public string GetWord()
+        {
+            return _word;
+        }
+
+        public int GetCount()
+        {
+            return _count;
+        }
 
         public void AddNextWord(string nextWord)
         {
@@ -25,14 +32,10 @@ namespace Woerterbuch
 
         private void AddNextWord(string nextWord, int count)
         {
-            if (_nextWords.ContainsKey(nextWord))
-            {
-                _nextWords[nextWord] += count;
-            }
+            if (GetNextWords.ContainsKey(nextWord))
+                GetNextWords[nextWord] += count;
             else
-            {
-                _nextWords[nextWord] = count;
-            }
+                GetNextWords[nextWord] = count;
         }
 
         public void IncreaseCount()
@@ -43,40 +46,32 @@ namespace Woerterbuch
         public bool Merge(WordInfo wordInfo)
         {
             if (wordInfo._word != GetWord()) return false;
-            
+
             _count += wordInfo.GetCount();
-            
-            foreach (var keyValPair in wordInfo._nextWords)
-            {
-                AddNextWord(keyValPair.Key, keyValPair.Value);
-            }
+
+            foreach (var keyValPair in wordInfo.GetNextWords) AddNextWord(keyValPair.Key, keyValPair.Value);
             return true;
         }
 
         public WordInfo CopyUpper()
         {
-            WordInfo wordInfoUpper = new WordInfo(GetWord().ToUpper());
+            var wordInfoUpper = new WordInfo(GetWord().ToUpper());
             wordInfoUpper._count = _count;
-            foreach (var keyValPair in _nextWords)
-            {
-                wordInfoUpper.AddNextWord(keyValPair.Key, keyValPair.Value);
-            }
+            foreach (var keyValPair in GetNextWords) wordInfoUpper.AddNextWord(keyValPair.Key, keyValPair.Value);
 
             return wordInfoUpper;
         }
 
         public override string ToString()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
             stringBuilder.Append(_word).Append("; ").Append(_count).Append("; [");
-            foreach (var keyValPair in _nextWords)
-            {
+            foreach (var keyValPair in GetNextWords)
                 stringBuilder.Append("{")
                     .Append(keyValPair.Key)
                     .Append(":")
                     .Append(keyValPair.Value)
                     .Append("}, ");
-            }
 
             stringBuilder.Remove(stringBuilder.Length - 1, 1);
             stringBuilder.Append("]");

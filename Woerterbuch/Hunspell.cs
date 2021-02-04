@@ -6,6 +6,9 @@ namespace SpellCheck
 {
     public class Hunspell : IDisposable
     {
+        private readonly byte[] _mByteArr = new byte[256];
+
+        private readonly Encoding _mEncoding = Encoding.GetEncoding("ISO-8859-1");
         private IntPtr _mPHunspell = IntPtr.Zero;
 
         public Hunspell(string affpath, string dpath)
@@ -24,9 +27,6 @@ namespace SpellCheck
             }
         }
 
-        private Encoding _mEncoding = Encoding.GetEncoding("ISO-8859-1");
-        private byte[] _mByteArr = new byte[256];
-
         public bool SpellCheck(string word)
         {
             _mEncoding.GetBytes(word, 0, word.Length, _mByteArr, 0);
@@ -36,7 +36,8 @@ namespace SpellCheck
         }
 
         [DllImport("libhunspell.so")]
-        private static extern IntPtr Hunspell_create([MarshalAs(UnmanagedType.LPStr)] string affpath, [MarshalAs(UnmanagedType.LPStr)] string dpath);
+        private static extern IntPtr Hunspell_create([MarshalAs(UnmanagedType.LPStr)] string affpath,
+            [MarshalAs(UnmanagedType.LPStr)] string dpath);
 
         [DllImport("libhunspell.so")]
         private static extern int Hunspell_spell(IntPtr pHunspell, byte[] word);
@@ -45,4 +46,3 @@ namespace SpellCheck
         private static extern void Hunspell_destroy(IntPtr pHunspell);
     }
 }
-
